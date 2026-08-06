@@ -393,6 +393,12 @@
     return xForDate(range, visibleStart(range, start)) + 4;
   }
 
+  function milestoneLeftPx(range, task) {
+    const start = parseISODate(task.startDate);
+    const centerX = xForDate(range, visibleStart(range, start)) + pxPerDay() / 2;
+    return centerX - BAR_HEIGHT / 2;
+  }
+
   function barWidthPx(range, task) {
     const start = parseISODate(task.startDate);
     const end = addDays(start, task.durationDays);
@@ -1364,13 +1370,19 @@
       track.style.width = totalWidth + 'px';
       renderColumnCells(track, columns, false);
 
+      const isMilestone = phase === 'Milestone';
       const bar = document.createElement('div');
-      bar.className = phase === 'Headline' ? 'bar headline' : 'bar';
-      bar.style.left = barLeftPx(range, task) + 'px';
-      bar.style.width = barWidthPx(range, task) + 'px';
+      bar.className = phase === 'Headline' ? 'bar headline' : isMilestone ? 'bar milestone' : 'bar';
+      if (isMilestone) {
+        bar.style.left = milestoneLeftPx(range, task) + 'px';
+        bar.style.width = BAR_HEIGHT + 'px';
+      } else {
+        bar.style.left = barLeftPx(range, task) + 'px';
+        bar.style.width = barWidthPx(range, task) + 'px';
+      }
       applyBarColor(bar, task);
 
-      if (labelMode !== 'off' && phase !== 'Headline') {
+      if (labelMode !== 'off' && phase !== 'Headline' && !isMilestone) {
         const barLabel = document.createElement('span');
         barLabel.className = 'bar-label';
         barLabel.textContent = formatBarLabel(task);
@@ -1425,8 +1437,12 @@
       const deltaDays = snapDaysDelta(dx);
       const newStart = addDays(origStart, deltaDays);
       const previewTask = { startDate: formatISODate(newStart), durationDays: task.durationDays };
-      barEl.style.left = barLeftPx(range, previewTask) + 'px';
-      barEl.style.width = barWidthPx(range, previewTask) + 'px';
+      if (task.phase === 'Milestone') {
+        barEl.style.left = milestoneLeftPx(range, previewTask) + 'px';
+      } else {
+        barEl.style.left = barLeftPx(range, previewTask) + 'px';
+        barEl.style.width = barWidthPx(range, previewTask) + 'px';
+      }
       task._pendingStartDate = formatISODate(newStart);
 
       // Vertical: reorder
@@ -1649,6 +1665,12 @@
     });
   }
 
+  function syncEditDurationForPhase() {
+    const isMilestone = editPhaseInput.value === 'Milestone';
+    if (isMilestone) editDurationInput.value = 1;
+    editDurationInput.disabled = isMilestone;
+  }
+
   function openEditDialog(task) {
     editingTaskId = task.id;
     editNameInput.value = task.name;
@@ -1657,11 +1679,14 @@
     editColorInput.value = task.color || DEFAULT_COLOR_1;
     editTagInput.value = task.tag || '';
     editPhaseInput.value = task.phase || DEFAULT_PHASE;
+    syncEditDurationForPhase();
     editDialog.showModal();
     editNameInput.focus();
   }
 
   buildColorPresets();
+
+  editPhaseInput.addEventListener('change', syncEditDurationForPhase);
 
   editCancelBtn.addEventListener('click', () => editDialog.close());
 
@@ -1683,10 +1708,12 @@
     task.name = editNameInput.value.trim() || 'Untitled';
     const chosen = parseISODate(editStartInput.value);
     if (chosen) task.startDate = formatISODate(chosen);
-    task.durationDays = Math.max(1, parseInt(editDurationInput.value, 10) || 1);
+    task.phase = editPhaseInput.value || DEFAULT_PHASE;
+    task.durationDays = task.phase === 'Milestone'
+      ? 1
+      : Math.max(1, parseInt(editDurationInput.value, 10) || 1);
     task.color = editColorInput.value || '';
     task.tag = editTagInput.value || '';
-    task.phase = editPhaseInput.value || DEFAULT_PHASE;
 
     render();
     scheduleSave();
@@ -1809,12 +1836,14 @@
       const name = truncateToWidth(ctx, task.name || '', labelWidth - 24);
       ctx.fillText(name, 16, y + ROW_HEIGHT / 2);
 
-      const barX = labelWidth + barLeftPx(range, task);
+      const phase = PHASE_OPTIONS.includes(task.phase) ? task.phase : DEFAULT_PHASE;
+      const isHeadline = phase === 'Headline';
+      const isMilestone = phase === 'Milestone';
+      const barX = labelWidth + (isMilestone ? milestoneLeftPx(range, task) : barLeftPx(range, task));
       const barY = y + (ROW_HEIGHT - BAR_HEIGHT) / 2;
-      const barW = barWidthPx(range, task);
+      const barW = isMilestone ? BAR_HEIGHT : barWidthPx(range, task);
       const barH = BAR_HEIGHT;
       const [c1] = barColors(task);
-      const isHeadline = (PHASE_OPTIONS.includes(task.phase) ? task.phase : DEFAULT_PHASE) === 'Headline';
 
       ctx.fillStyle = c1;
       if (isHeadline) {
@@ -1826,12 +1855,23 @@
         ctx.beginPath();
         ctx.arc(barX + barW, lineY, 5, 0, Math.PI * 2);
         ctx.fill();
+      } else if (isMilestone) {
+        const cx = barX + barW / 2;
+        const cy = barY + barH / 2;
+        const r = barH / 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - r);
+        ctx.lineTo(cx + r, cy);
+        ctx.lineTo(cx, cy + r);
+        ctx.lineTo(cx - r, cy);
+        ctx.closePath();
+        ctx.fill();
       } else {
         roundRectPath(ctx, barX, barY, barW, barH, 6);
         ctx.fill();
       }
 
-      if (labelMode !== 'off' && !isHeadline) {
+      if (labelMode !== 'off' && !isHeadline && !isMilestone) {
         ctx.save();
         roundRectPath(ctx, barX, barY, barW, barH, 6);
         ctx.clip();
