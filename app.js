@@ -81,6 +81,11 @@
   const exportPngBtn = document.getElementById('export-png-btn');
   const exportPdfBtn = document.getElementById('export-pdf-btn');
   const exportCsvBtn = document.getElementById('export-csv-btn');
+  const exportLinkBtn = document.getElementById('export-link-btn');
+  const linkDialog = document.getElementById('link-dialog');
+  const linkOutput = document.getElementById('link-output');
+  const linkCopyBtn = document.getElementById('link-copy-btn');
+  const linkCloseBtn = document.getElementById('link-close-btn');
   const autosortBtn = document.getElementById('autosort-btn');
   const openFileBtn = document.getElementById('open-file-btn');
   const newFileBtn = document.getElementById('new-file-btn');
@@ -1865,6 +1870,13 @@
     URL.revokeObjectURL(url);
   }
 
+  function openLinkDialog() {
+    const id = String(currentProjectId == null ? '' : currentProjectId).replace(/\s+/g, '');
+    linkOutput.value = 'https://ganttviewer.stevebaird.co.uk/viewer.html?v=' + id;
+    linkDialog.showModal();
+    linkOutput.select();
+  }
+
   function exportPng() {
     const canvas = drawGanttToCanvas();
     canvas.toBlob((blob) => {
@@ -1985,6 +1997,12 @@
   exportPngBtn.addEventListener('click', () => { closeExportMenu(); exportPng(); });
   exportPdfBtn.addEventListener('click', () => { closeExportMenu(); exportPdf(); });
   exportCsvBtn.addEventListener('click', () => { closeExportMenu(); exportCsv(); });
+  exportLinkBtn.addEventListener('click', () => { closeExportMenu(); openLinkDialog(); });
+  linkCloseBtn.addEventListener('click', () => linkDialog.close());
+  linkCopyBtn.addEventListener('click', () => {
+    linkOutput.select();
+    navigator.clipboard?.writeText(linkOutput.value).catch(() => {});
+  });
   viewButtons.forEach((btn) => btn.addEventListener('click', () => setViewMode(btn.dataset.view)));
   syncViewButtons();
 

@@ -47,6 +47,7 @@
           <button type="button" id="export-csv-btn" class="dropdown-item" role="menuitem">to CSV</button>
           <button type="button" id="export-pdf-btn" class="dropdown-item" role="menuitem">to PDF</button>
           <button type="button" id="export-png-btn" class="dropdown-item" role="menuitem">to PNG</button>
+          <button type="button" id="export-link-btn" class="dropdown-item" role="menuitem">Link</button>
         </div>
       </div>
       <a id="milestones-btn" class="btn btn-green" href="milestones.html" target="_blank" rel="noopener" hidden>Milestones</a>
@@ -210,6 +211,16 @@
     <ul id="projects-list" class="tags-list"></ul>
     <div class="edit-dialog-actions">
       <button type="button" id="projects-close-btn" class="btn">Cancel</button>
+    </div>
+  </dialog>
+
+  <dialog id="link-dialog" class="edit-dialog link-dialog">
+    <h2>Viewer Link</h2>
+    <p class="filter-hint">Share this link for a read-only view of this project.</p>
+    <input type="text" id="link-output" readonly />
+    <div class="edit-dialog-actions">
+      <button type="button" id="link-copy-btn" class="btn">Copy</button>
+      <button type="button" id="link-close-btn" class="btn btn-primary">Close</button>
     </div>
   </dialog>
 
