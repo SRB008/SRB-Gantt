@@ -56,6 +56,7 @@
   const ZOOM_STEP = 0.25;
   const DEFAULT_ZOOM = 1;
   const THEME_STORAGE_KEY = 'roadmap-gantt-theme';
+  const DATELINE_STORAGE_KEY = 'roadmap-gantt-dateline-visible';
   const LABEL_WIDTH_STORAGE_KEY = 'roadmap-gantt-label-width';
   const MIN_LABEL_WIDTH = 160;
   const MAX_LABEL_WIDTH = 480;
@@ -178,6 +179,16 @@
     if (storedTheme === 'light' || storedTheme === 'dark') theme = storedTheme;
   } catch (err) {
     // localStorage unavailable — fall back to the default theme.
+  }
+
+  let datelineVisible = true;
+  try {
+    const storedDatelineVisible = localStorage.getItem(DATELINE_STORAGE_KEY);
+    if (storedDatelineVisible === 'true' || storedDatelineVisible === 'false') {
+      datelineVisible = storedDatelineVisible === 'true';
+    }
+  } catch (err) {
+    // localStorage unavailable — fall back to the default (dateline visible).
   }
 
   let labelWidth = LABEL_WIDTH;
@@ -891,6 +902,19 @@
     syncDisplayDialog();
   }
 
+  // ---------- Dateline (today marker) ----------
+  function setDatelineVisible(next) {
+    if (next === datelineVisible) return;
+    datelineVisible = next;
+    try {
+      localStorage.setItem(DATELINE_STORAGE_KEY, String(datelineVisible));
+    } catch (err) {
+      // ignore — persistence is a convenience, not a requirement
+    }
+    syncDisplayDialog();
+    render();
+  }
+
   // ---------- Task column width ----------
   function applyLabelWidth() {
     document.documentElement.style.setProperty('--label-width', labelWidth + 'px');
@@ -961,7 +985,7 @@
 
   // ---------- Display options popup (label / density / theme) ----------
   function syncDisplayDialog() {
-    const current = { label: labelMode, density, theme };
+    const current = { label: labelMode, density, theme, dateline: datelineVisible ? 'on' : 'off' };
     displayGroupButtons.forEach((btn) => {
       const { group, value } = btn.dataset;
       btn.classList.toggle('active', current[group] === value);
@@ -1273,7 +1297,7 @@
 
   function renderTodayLine(range) {
     const today = startOfDay(new Date());
-    if (today < range.start || today >= range.end) {
+    if (!datelineVisible || today < range.start || today >= range.end) {
       todayLineEl.hidden = true;
       return;
     }
@@ -1814,7 +1838,7 @@
     });
 
     const today = startOfDay(new Date());
-    if (today >= range.start && today < range.end) {
+    if (datelineVisible && today >= range.start && today < range.end) {
       const todayX = labelWidth + xForDate(range, today);
       ctx.strokeStyle = colors.accent;
       ctx.lineWidth = 2;
@@ -1979,6 +2003,7 @@
       if (group === 'label') setLabelMode(value);
       else if (group === 'density') setDensity(value);
       else if (group === 'theme') setTheme(value);
+      else if (group === 'dateline') setDatelineVisible(value === 'on');
     });
   });
 
