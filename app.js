@@ -1872,7 +1872,7 @@
 
   function openLinkDialog() {
     const id = String(currentProjectId == null ? '' : currentProjectId).replace(/\s+/g, '');
-    linkOutput.value = 'https://ganttviewer.stevebaird.co.uk/viewer.html?v=' + id;
+    linkOutput.value = 'https://ganttviewer.stevebaird.co.uk/?v=' + id;
     linkDialog.showModal();
     linkOutput.select();
   }
