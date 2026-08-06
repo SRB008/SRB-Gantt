@@ -494,6 +494,7 @@ body {
   height: 14px;
   margin: 0 2px;
   display: block;
+  cursor: pointer;
 }
 
 :root[data-theme="dark"] .phase-icon {
@@ -518,6 +519,7 @@ body {
 }
 
 .edit-btn {
+  display: none;
   background: transparent;
   border: none;
   color: var(--muted);
@@ -552,7 +554,7 @@ body {
   top: calc((var(--row-height) - var(--bar-height)) / 2);
   height: var(--bar-height);
   border-radius: 6px;
-  background: var(--accent);
+  background: var(--bar-color, var(--accent));
   display: flex;
   align-items: center;
   padding: 0 10px;
@@ -566,6 +568,43 @@ body {
 .bar.dragging {
   opacity: 0.95;
   box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+
+.bar.headline {
+  background: transparent;
+  box-shadow: none;
+}
+
+.bar.headline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  transform: translateY(-50%);
+  background: var(--bar-color);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.bar.headline .resize-handle {
+  top: 50%;
+  left: auto;
+  right: auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bar-color);
+  transform: translateY(-50%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.bar.headline .resize-handle.left { left: -5px; }
+.bar.headline .resize-handle.right { right: -5px; }
+
+.bar.headline .resize-handle:hover {
+  filter: brightness(1.15);
 }
 
 .bar-label {

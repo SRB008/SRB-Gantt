@@ -94,13 +94,14 @@
           <option value="">—</option>
         </select>
       </label>
-      <label>Progress
+      <label>Status
         <select id="edit-phase">
           <option value="Not Started">Not Started</option>
           <option value="Discovery">Started</option>
           <option value="Build">In Progress</option>
           <option value="Test">Finalising</option>
           <option value="Complete">Complete</option>
+          <option value="Headline">Headline</option>
           <option value="Milestone">Milestone</option>
         </select>
       </label>
@@ -151,14 +152,14 @@
 
   <dialog id="filter-dialog" class="edit-dialog filter-dialog">
     <h2>Filter</h2>
-    <p class="filter-hint">Show tasks matching the selected tag, progress, and color. Nothing selected in a group shows all.</p>
+    <p class="filter-hint">Show tasks matching the selected tag, status, and color. Nothing selected in a group shows all.</p>
     <div class="filter-groups">
       <div class="filter-group">
         <span class="display-group-label">Tag</span>
         <div id="filter-tag-list" class="filter-tag-list"></div>
       </div>
       <div class="filter-group">
-        <span class="display-group-label">Progress</span>
+        <span class="display-group-label">Status</span>
         <div id="filter-phase-list" class="filter-tag-list"></div>
       </div>
       <div class="filter-group">

@@ -27,7 +27,7 @@
   const DEFAULT_TAG_OPTIONS = [
     'Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5', 'Tag 6', 'Tag 7', 'Tag 8',
   ];
-  const PHASE_OPTIONS = ['Not Started', 'Discovery', 'Build', 'Test', 'Complete', 'Milestone'];
+  const PHASE_OPTIONS = ['Not Started', 'Discovery', 'Build', 'Test', 'Complete', 'Headline', 'Milestone'];
   const DEFAULT_PHASE = 'Not Started';
   const PHASE_ICON_FILES = {
     'Not Started': 'circle-0.svg',
@@ -35,6 +35,7 @@
     'Build': 'circle-4.svg',
     'Test': 'circle-6.svg',
     'Complete': 'circle-8.svg',
+    'Headline': 'headline.svg',
     'Milestone': 'milestone.svg',
   };
   const PHASE_LABELS = {
@@ -43,6 +44,7 @@
     'Build': 'In Progress',
     'Test': 'Finalising',
     'Complete': 'Complete',
+    'Headline': 'Headline',
     'Milestone': 'Milestone',
   };
   const VIEW_MODES = ['day', 'week', 'month'];
@@ -433,7 +435,7 @@
 
   function applyBarColor(bar, task) {
     const [c1] = barColors(task);
-    bar.style.background = c1;
+    bar.style.setProperty('--bar-color', c1);
   }
 
   // ---------- Supabase (persist projects to the database) ----------
@@ -1305,7 +1307,8 @@
       const phase = PHASE_OPTIONS.includes(task.phase) ? task.phase : DEFAULT_PHASE;
       phaseIcon.src = PHASE_ICON_FILES[phase];
       phaseIcon.alt = PHASE_LABELS[phase] || phase;
-      phaseIcon.title = `Progress: ${PHASE_LABELS[phase] || phase}`;
+      phaseIcon.title = `Status: ${PHASE_LABELS[phase] || phase}`;
+      phaseIcon.addEventListener('click', () => openEditDialog(task));
       label.appendChild(phaseIcon);
 
       const nameInput = document.createElement('input');
@@ -1333,12 +1336,12 @@
       renderColumnCells(track, columns, false);
 
       const bar = document.createElement('div');
-      bar.className = 'bar';
+      bar.className = phase === 'Headline' ? 'bar headline' : 'bar';
       bar.style.left = barLeftPx(range, task) + 'px';
       bar.style.width = barWidthPx(range, task) + 'px';
       applyBarColor(bar, task);
 
-      if (labelMode !== 'off') {
+      if (labelMode !== 'off' && phase !== 'Headline') {
         const barLabel = document.createElement('span');
         barLabel.className = 'bar-label';
         barLabel.textContent = formatBarLabel(task);
@@ -1782,12 +1785,24 @@
       const barW = barWidthPx(range, task);
       const barH = BAR_HEIGHT;
       const [c1] = barColors(task);
+      const isHeadline = (PHASE_OPTIONS.includes(task.phase) ? task.phase : DEFAULT_PHASE) === 'Headline';
 
       ctx.fillStyle = c1;
-      roundRectPath(ctx, barX, barY, barW, barH, 6);
-      ctx.fill();
+      if (isHeadline) {
+        const lineY = y + ROW_HEIGHT / 2;
+        ctx.fillRect(barX, lineY - 1.5, barW, 3);
+        ctx.beginPath();
+        ctx.arc(barX, lineY, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(barX + barW, lineY, 5, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        roundRectPath(ctx, barX, barY, barW, barH, 6);
+        ctx.fill();
+      }
 
-      if (labelMode !== 'off') {
+      if (labelMode !== 'off' && !isHeadline) {
         ctx.save();
         roundRectPath(ctx, barX, barY, barW, barH, 6);
         ctx.clip();
