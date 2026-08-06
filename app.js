@@ -1858,7 +1858,7 @@
       } else if (isMilestone) {
         const cx = barX + barW / 2;
         const cy = barY + barH / 2;
-        const r = barH / 2;
+        const r = (barH / 2) * 0.8;
         ctx.beginPath();
         ctx.moveTo(cx, cy - r);
         ctx.lineTo(cx + r, cy);
