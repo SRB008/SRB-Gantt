@@ -1615,7 +1615,12 @@
       .sort((a, b) => {
         const startCmp = parseISODate(a.startDate) - parseISODate(b.startDate);
         if (startCmp !== 0) return startCmp;
-        const durCmp = a.durationDays - b.durationDays;
+        const aHeadline = a.phase === 'Headline' ? 0 : 1;
+        const bHeadline = b.phase === 'Headline' ? 0 : 1;
+        if (aHeadline !== bHeadline) return aHeadline - bHeadline;
+        const durCmp = aHeadline === 0
+          ? b.durationDays - a.durationDays
+          : a.durationDays - b.durationDays;
         if (durCmp !== 0) return durCmp;
         return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
       })
