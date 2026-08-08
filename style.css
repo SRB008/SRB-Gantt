@@ -524,6 +524,11 @@ body {
   outline: none;
 }
 
+.task-name.headline-text {
+  font-weight: 700;
+  font-style: italic
+}
+
 .edit-btn {
   display: none;
   background: transparent;
