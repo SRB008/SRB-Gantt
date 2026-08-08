@@ -1347,7 +1347,7 @@
       label.appendChild(phaseIcon);
 
       const nameInput = document.createElement('input');
-      nameInput.className = 'task-name';
+      nameInput.className = phase === 'Headline' ? 'task-name headline-text' : 'task-name';
       nameInput.value = task.name;
       nameInput.addEventListener('input', () => {
         task.name = nameInput.value;
